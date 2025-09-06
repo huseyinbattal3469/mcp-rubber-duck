@@ -21,6 +21,7 @@ import { listDucksTool } from './tools/list-ducks.js';
 import { listModelsTool } from './tools/list-models.js';
 import { compareDucksTool } from './tools/compare-ducks.js';
 import { duckCouncilTool } from './tools/duck-council.js';
+import { chatDuckStreamTool, askDuckStreamTool } from './tools/streaming.js';
 
 export class RubberDuckServer {
   private server: Server;
@@ -72,8 +73,24 @@ export class RubberDuckServer {
               args
             );
 
+          case 'ask_duck_stream':
+            // Handle streaming response for ask_duck
+            return await askDuckStreamTool(
+              this.providerManager,
+              this.cache,
+              args
+            );
+
           case 'chat_with_duck':
             return await chatDuckTool(
+              this.providerManager,
+              this.conversationManager,
+              args
+            );
+
+          case 'chat_with_duck_stream':
+            // Handle streaming response for chat_with_duck
+            return await chatDuckStreamTool(
               this.providerManager,
               this.conversationManager,
               args
@@ -257,6 +274,60 @@ export class RubberDuckServer {
             },
           },
           required: ['prompt'],
+        },
+      },
+      {
+        name: 'ask_duck_stream',
+        description: 'Ask a question to a specific LLM provider with streaming response',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            prompt: {
+              type: 'string',
+              description: 'The question or prompt to send to the duck',
+            },
+            provider: {
+              type: 'string',
+              description: 'The provider name (optional, uses default if not specified)',
+            },
+            model: {
+              type: 'string',
+              description: 'Specific model to use (optional, uses provider default if not specified)',
+            },
+            temperature: {
+              type: 'number',
+              description: 'Temperature for response generation (0-2)',
+              minimum: 0,
+              maximum: 2,
+            },
+          },
+          required: ['prompt'],
+        },
+      },
+      {
+        name: 'chat_with_duck_stream',
+        description: 'Have a conversation with a duck using streaming response',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            conversation_id: {
+              type: 'string',
+              description: 'Conversation ID (creates new if not exists)',
+            },
+            message: {
+              type: 'string',
+              description: 'Your message to the duck',
+            },
+            provider: {
+              type: 'string',
+              description: 'Provider to use (can switch mid-conversation)',
+            },
+            model: {
+              type: 'string',
+              description: 'Specific model to use (optional)',
+            },
+          },
+          required: ['conversation_id', 'message'],
         },
       },
     ];

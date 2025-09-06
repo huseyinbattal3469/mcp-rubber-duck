@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
-import { ProviderConfig, ConversationMessage } from '../../config/types.js';
+import { ProviderConfig } from '../../config/types.js';
 import { ChatOptions, ChatResponse, StreamChunk, ModelInfo } from '../types.js';
+import { all } from '../../utils/logger.js';
 
 export class OpenRouterAdapter {
   private config: ProviderConfig;
@@ -52,16 +53,45 @@ export class OpenRouterAdapter {
         model: this.config.default_model,
         messages: [{ role: 'user', content: 'Say "healthy"' }]
       };
+      
+      try { all('OpenRouter health check', { url, model: this.config.default_model }); } catch (e) {}
+      
       const res = await fetch(url, {
         method: 'POST',
         headers,
         body: JSON.stringify(body)
       });
-      if (!res.ok) return false;
+      
+      if (!res.ok) {
+        const txt = await res.text();
+        try { 
+          all('OpenRouter health check failed', { 
+            url, 
+            status: res.status, 
+            statusText: res.statusText,
+            headers: Object.fromEntries(res.headers.entries()),
+            body: txt.slice(0, 2000) 
+          }); 
+        } catch (e) {}
+        return false;
+      }
+      
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content;
-      return !!content;
-    } catch {
+      const healthy = !!content;
+      
+      try { 
+        all('OpenRouter health check result', { 
+          healthy, 
+          content: content?.slice(0, 100),
+          model: body.model,
+          usage: data.usage 
+        }); 
+      } catch (e) {}
+      
+      return healthy;
+    } catch (error: any) {
+      try { all('OpenRouter health check exception', { error: error.message, stack: error.stack?.slice(0, 1000) }); } catch (e) {}
       return false;
     }
   }

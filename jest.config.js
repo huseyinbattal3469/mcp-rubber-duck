@@ -7,13 +7,22 @@ export default {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        useESM: true,
-      },
-    ],
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
+      isolatedModules: true,
+      tsconfig: {
+        module: 'esnext',
+        target: 'es2022',
+        moduleResolution: 'node',
+        isolatedModules: true,
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true
+      }
+    }],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(chalk|strip-ansi|ansi-regex)/)'
+  ],
   testMatch: ['**/tests/**/*.test.ts'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
