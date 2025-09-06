@@ -1,35 +1,114 @@
 #!/usr/bin/env node
 
-// Test script for MCP Rubber Duck functionality
+// Test script for MCP Rubber Duck functionality - Environment Variables Only
 import 'dotenv/config';
-import { RubberDuckServer } from './dist/server.js';
-import { ConfigManager } from './dist/config/config.js';
-import { ProviderManager } from './dist/providers/manager.js';
-import { ConversationManager } from './dist/services/conversation.js';
-import { ResponseCache } from './dist/services/cache.js';
-import { HealthMonitor } from './dist/services/health.js';
 
-// Import tools
-import { askDuckTool } from './dist/tools/ask-duck.js';
-import { listDucksTool } from './dist/tools/list-ducks.js';
-import { listModelsTool } from './dist/tools/list-models.js';
-import { compareDucksTool } from './dist/tools/compare-ducks.js';
-import { duckCouncilTool } from './dist/tools/duck-council.js';
-import { chatDuckTool } from './dist/tools/chat-duck.js';
-
-console.log('🦆 Testing MCP Rubber Duck Functionality\n');
+console.log('🦆 Testing MCP Rubber Duck Functionality (ENV ONLY)\n');
 console.log('API Keys loaded from .env:');
 console.log(`- OpenAI: ${process.env.OPENAI_API_KEY ? '✅ Found' : '❌ Missing'}`);
-console.log(`- Gemini: ${process.env.GEMINI_API_KEY ? '✅ Found' : '❌ Missing'}\n`);
+console.log(`- Gemini: ${process.env.GEMINI_API_KEY ? '✅ Found' : '❌ Missing'}`);
+console.log(`- OpenRouter: ${process.env.OPENROUTER_API_KEY ? '✅ Found' : '❌ Missing'}`);
+console.log(`- Ollama: ${process.env.OLLAMA_BASE_URL ? '✅ Found' : '❌ Missing'}\n`);
+
+// Mock ConfigManager to prevent loading config.json
+class EnvOnlyConfigManager {
+  constructor() {
+    this.config = this.loadFromEnvOnly();
+  }
+  
+  loadFromEnvOnly() {
+    const config = {
+      log_level: process.env.LOG_LEVEL || 'info',
+      default_provider: process.env.DEFAULT_PROVIDER || 'openai',
+      cache_ttl: parseInt(process.env.CACHE_TTL || '300'),
+      providers: {}
+    };
+
+    // Add providers based on environment variables only
+    if (process.env.OPENAI_API_KEY) {
+      config.providers.openai = {
+        api_key: process.env.OPENAI_API_KEY,
+        base_url: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
+        default_model: process.env.OPENAI_DEFAULT_MODEL || 'gpt-4o-mini',
+        nickname: process.env.OPENAI_NICKNAME || 'OpenAI Duck',
+        temperature: parseFloat(process.env.DEFAULT_TEMPERATURE || '0.7'),
+        timeout: parseInt(process.env.TIMEOUT || '30000'),
+        max_retries: parseInt(process.env.MAX_RETRIES || '3'),
+        models: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo']
+      };
+    }
+
+    if (process.env.GEMINI_API_KEY) {
+      config.providers.gemini = {
+        api_key: process.env.GEMINI_API_KEY,
+        base_url: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta',
+        default_model: process.env.GEMINI_DEFAULT_MODEL || 'gemini-1.5-flash',
+        nickname: process.env.GEMINI_NICKNAME || 'Gemini Duck',
+        temperature: parseFloat(process.env.DEFAULT_TEMPERATURE || '0.7'),
+        timeout: parseInt(process.env.TIMEOUT || '30000'),
+        max_retries: parseInt(process.env.MAX_RETRIES || '3'),
+        models: ['gemini-1.5-flash', 'gemini-1.5-pro']
+      };
+    }
+
+    if (process.env.OPENROUTER_API_KEY) {
+      config.providers.openrouter = {
+        api_key: process.env.OPENROUTER_API_KEY,
+        base_url: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+        default_model: process.env.OPENROUTER_DEFAULT_MODEL || 'google/gemini-flash-1.5-8b:free',
+        nickname: process.env.OPENROUTER_NICKNAME || 'OpenRouter Duck',
+        temperature: parseFloat(process.env.DEFAULT_TEMPERATURE || '0.7'),
+        timeout: parseInt(process.env.TIMEOUT || '30000'),
+        max_retries: parseInt(process.env.MAX_RETRIES || '3'),
+        models: ['google/gemini-flash-1.5-8b:free', 'meta-llama/llama-3.2-3b-instruct:free']
+      };
+    }
+
+    if (process.env.OLLAMA_BASE_URL) {
+      config.providers.ollama = {
+        base_url: process.env.OLLAMA_BASE_URL,
+        default_model: process.env.OLLAMA_DEFAULT_MODEL || 'llama3',
+        nickname: process.env.OLLAMA_NICKNAME || 'Local Quacker',
+        temperature: parseFloat(process.env.DEFAULT_TEMPERATURE || '0.7'),
+        timeout: parseInt(process.env.TIMEOUT || '30000'),
+        max_retries: parseInt(process.env.MAX_RETRIES || '3'),
+        models: ['llama3', 'gemma3:4b', 'granite3.3:2b']
+      };
+    }
+
+    return config;
+  }
+  
+  getConfig() {
+    return this.config;
+  }
+}
 
 async function runTests() {
   try {
-    // Initialize managers
-    const configManager = new ConfigManager();
+    // Initialize managers with environment-only config
+    const configManager = new EnvOnlyConfigManager();
+    
+    // Import the actual modules after mocking
+    const { ProviderManager } = await import('./dist/providers/manager.js');
+    const { ConversationManager } = await import('./dist/services/conversation.js');
+    const { ResponseCache } = await import('./dist/services/cache.js');
+    const { HealthMonitor } = await import('./dist/services/health.js');
+
+    // Import tools
+    const { askDuckTool } = await import('./dist/tools/ask-duck.js');
+    const { listDucksTool } = await import('./dist/tools/list-ducks.js');
+    const { listModelsTool } = await import('./dist/tools/list-models.js');
+    const { compareDucksTool } = await import('./dist/tools/compare-ducks.js');
+    const { duckCouncilTool } = await import('./dist/tools/duck-council.js');
+    const { chatDuckTool } = await import('./dist/tools/chat-duck.js');
+    
     const providerManager = new ProviderManager(configManager);
     const conversationManager = new ConversationManager();
-    const cache = new ResponseCache(300);
+    const cache = new ResponseCache(configManager.getConfig().cache_ttl);
     const healthMonitor = new HealthMonitor(providerManager);
+
+    console.log(`📋 Using ${Object.keys(configManager.getConfig().providers).length} providers from .env file only\n`);
 
     // Test 1: List all ducks
     console.log('📋 Test 1: List all ducks');

@@ -171,7 +171,7 @@ Edit your Claude Desktop config file:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-Add the MCP server configuration:
+#### Basic Configuration Example
 
 ```json
 {
@@ -192,9 +192,264 @@ Add the MCP server configuration:
 }
 ```
 
+#### Advanced Multi-Provider Configuration
+
+```json
+{
+  "mcpServers": {
+    "rubber-duck": {
+      "command": "node",
+      "args": ["C:/Users/yourusername/Desktop/mcp-rubber-duck/dist/index.js"],
+      "type": "stdio",
+      "env": {
+        // OpenAI Configuration
+        "OPENAI_API_KEY": "sk-your-openai-api-key-here",
+        "OPENAI_DEFAULT_MODEL": "gpt-4o-mini",
+        "OPENAI_NICKNAME": "GPT Duck",
+
+        // Gemini Configuration
+        "GEMINI_API_KEY": "your-gemini-api-key-here",
+        "GEMINI_DEFAULT_MODEL": "gemini-2.5-flash",
+        "GEMINI_NICKNAME": "Gemini Duck",
+
+        // Ollama (Local) Configuration
+        "OLLAMA_BASE_URL": "http://localhost:11434/v1",
+        "OLLAMA_MODELS": "deepscaler:1.5b,hermes3:3b,granite3.3:2b,smollm2:1.7b,exaone-deep:2.4b,llama3.2:3b,deepseek-r1:1.5b,qwen3:4b,gemma3:4b",
+        "OLLAMA_DEFAULT_MODEL": "gemma3:4b",
+        "OLLAMA_NICKNAME": "Local Quacker",
+
+        // OpenRouter Configuration
+        "OPENROUTER_API_KEY": "sk-or-v1-your-openrouter-api-key-here",
+        "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+        "OPENROUTER_MODELS": "deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free,meta-llama/llama-3.2-3b-instruct:free",
+        "OPENROUTER_DEFAULT_MODEL": "deepseek/deepseek-chat-v3.1:free",
+        "OPENROUTER_NICKNAME": "OpenRouter Duck",
+
+        // Global Settings
+        "DEFAULT_PROVIDER": "openrouter",
+        "DEFAULT_TEMPERATURE": "0.7",
+        "LOG_LEVEL": "info",
+        
+        // Performance Settings
+        "CACHE_TTL": "300",
+        "TIMEOUT": "30000",
+        "MAX_RETRIES": "3"
+      }
+    }
+  }
+}
+```
+
 **Important**: Replace the placeholder API keys with your actual keys:
 - `your-openai-api-key-here` → Your OpenAI API key (starts with `sk-`)
 - `your-gemini-api-key-here` → Your Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+- `your-openrouter-api-key-here` → Your OpenRouter API key from [OpenRouter](https://openrouter.ai/keys)
+
+## VS Code with MCP Extension Configuration
+
+If you're using VS Code with an MCP extension, here's how to configure the Rubber Duck server:
+
+### Step 1: Install MCP Extension
+
+Install a compatible MCP extension from the VS Code marketplace.
+
+### Step 2: Configure in VS Code Settings
+
+Add to your VS Code `settings.json` or workspace settings:
+
+```json
+{
+  "mcp.servers": {
+    "rubber-duck": {
+      "command": "node",
+      "args": ["C:/absolute/path/to/mcp-rubber-duck/dist/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "sk-your-openai-api-key",
+        "GEMINI_API_KEY": "your-gemini-api-key",
+        "OLLAMA_BASE_URL": "http://localhost:11434/v1",
+        "OLLAMA_DEFAULT_MODEL": "gemma3:4b",
+        "OPENROUTER_API_KEY": "sk-or-v1-your-openrouter-key",
+        "OPENROUTER_DEFAULT_MODEL": "deepseek/deepseek-chat-v3.1:free",
+        "DEFAULT_PROVIDER": "openai",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+### Step 3: Create MCP Configuration File
+
+Alternatively, create an `mcp.json` file in your VS Code user data directory:
+
+**Windows**: `%APPDATA%\Code\User\mcp.json`
+**macOS**: `~/Library/Application Support/Code/User/mcp.json`
+**Linux**: `~/.config/Code/User/mcp.json`
+
+```json
+{
+  "servers": {
+    "rubber-duck": {
+      "command": "node",
+      "args": ["C:/Users/yourusername/Desktop/mcp-rubber-duck/dist/index.js"],
+      "type": "stdio",
+      "env": {
+        "OLLAMA_BASE_URL": "http://localhost:11434/v1",
+        "OLLAMA_MODELS": "deepscaler:1.5b,hermes3:3b,granite3.3:2b,smollm2:1.7b,exaone-deep:2.4b,llama3.2:3b,deepseek-r1:1.5b,qwen3:4b,gemma3:4b",
+        "OLLAMA_DEFAULT_MODEL": "gemma3:4b",
+        "OPENROUTER_API_KEY": "sk-or-v1-your-openrouter-api-key-here",
+        "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+        "OPENROUTER_MODELS": "deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free",
+        "OPENROUTER_DEFAULT_MODEL": "deepseek/deepseek-chat-v3.1:free",
+        "DEFAULT_PROVIDER": "openrouter",
+        "DEFAULT_TEMPERATURE": "0.7",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+## Complete Environment Variables Reference
+
+### Provider Configuration
+
+#### OpenAI Provider
+```env
+OPENAI_API_KEY=sk-...                    # Required: Your OpenAI API key
+OPENAI_BASE_URL=https://api.openai.com/v1 # Optional: Custom endpoint URL
+OPENAI_DEFAULT_MODEL=gpt-4o-mini         # Optional: Default model to use
+OPENAI_MODELS=gpt-4o,gpt-4o-mini,gpt-3.5-turbo # Optional: Available models list
+OPENAI_NICKNAME="GPT Duck"               # Optional: Custom provider nickname
+```
+
+#### Google Gemini Provider
+```env
+GEMINI_API_KEY=...                       # Required: Your Gemini API key
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta # Optional: Custom endpoint
+GEMINI_DEFAULT_MODEL=gemini-2.5-flash    # Optional: Default model to use
+GEMINI_MODELS=gemini-2.5-flash,gemini-2.0-flash,gemini-1.5-pro # Optional: Available models
+GEMINI_NICKNAME="Gemini Duck"            # Optional: Custom provider nickname
+```
+
+#### Ollama Provider (Local)
+```env
+OLLAMA_BASE_URL=http://localhost:11434/v1 # Optional: Ollama server URL
+OLLAMA_DEFAULT_MODEL=gemma3:4b           # Optional: Default local model
+OLLAMA_MODELS=gemma3:4b,llama3.2:3b,qwen3:4b # Optional: Available local models (comma-separated)
+OLLAMA_NICKNAME="Local Quacker"          # Optional: Custom provider nickname
+```
+
+#### OpenRouter Provider
+```env
+OPENROUTER_API_KEY=sk-or-v1-...          # Required: Your OpenRouter API key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1 # Optional: Custom endpoint URL
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free # Optional: Default model
+OPENROUTER_MODELS=deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free # Optional: Available models
+OPENROUTER_NICKNAME="OpenRouter Duck"    # Optional: Custom provider nickname
+```
+
+#### Groq Provider
+```env
+GROQ_API_KEY=gsk_...                     # Required: Your Groq API key
+GROQ_BASE_URL=https://api.groq.com/openai/v1 # Optional: Custom endpoint URL
+GROQ_DEFAULT_MODEL=llama-3.3-70b-versatile # Optional: Default model to use
+GROQ_MODELS=llama-3.3-70b-versatile,mixtral-8x7b-32768 # Optional: Available models
+GROQ_NICKNAME="Groq Duck"                # Optional: Custom provider nickname
+```
+
+#### Anthropic Provider (via OpenAI-compatible endpoint)
+```env
+ANTHROPIC_API_KEY=sk-ant-...             # Required: Your Anthropic API key
+ANTHROPIC_BASE_URL=https://api.anthropic.com/v1 # Optional: Custom endpoint URL
+ANTHROPIC_DEFAULT_MODEL=claude-3-5-sonnet-20241022 # Optional: Default model
+ANTHROPIC_MODELS=claude-3-5-sonnet-20241022,claude-3-haiku-20240307 # Optional: Available models
+ANTHROPIC_NICKNAME="Claude Duck"         # Optional: Custom provider nickname
+```
+
+#### Custom Provider
+```env
+CUSTOM_API_KEY=...                       # Required: Your custom provider API key
+CUSTOM_BASE_URL=https://api.example.com/v1 # Required: Custom provider endpoint URL
+CUSTOM_DEFAULT_MODEL=custom-model        # Optional: Default model to use
+CUSTOM_MODELS=model1,model2,model3       # Optional: Available models list
+CUSTOM_NICKNAME="Custom Duck"            # Optional: Custom provider nickname
+```
+
+### Global Configuration
+
+#### Core Settings
+```env
+DEFAULT_PROVIDER=openai                  # Optional: Default provider to use (openai, gemini, ollama, openrouter, etc.)
+DEFAULT_TEMPERATURE=0.7                  # Optional: Default temperature for all requests (0.0-2.0)
+LOG_LEVEL=info                          # Optional: Logging level (debug, info, warn, error)
+```
+
+#### Performance & Reliability
+```env
+CACHE_TTL=300                           # Optional: Cache time-to-live in seconds (default: 300)
+TIMEOUT=30000                           # Optional: Request timeout in milliseconds (default: 30000)
+MAX_RETRIES=3                           # Optional: Maximum retry attempts (default: 3)
+```
+
+#### Advanced Features
+```env
+# MCP Bridge Settings (for advanced integrations)
+MCP_BRIDGE_ENABLED=true                 # Optional: Enable MCP bridge functionality
+MCP_APPROVAL_MODE=trusted               # Optional: Approval mode (always, trusted, or never)
+MCP_APPROVAL_TIMEOUT=300                # Optional: Approval timeout in seconds
+
+# Context7 Documentation Server (example MCP server integration)
+MCP_SERVER_CONTEXT7_TYPE=http           # Optional: MCP server type
+MCP_SERVER_CONTEXT7_URL=https://mcp.context7.com/mcp # Optional: MCP server URL
+MCP_SERVER_CONTEXT7_ENABLED=true       # Optional: Enable specific MCP server
+MCP_TRUSTED_TOOLS_CONTEXT7=*           # Optional: Trust all tools from this server
+```
+
+### Environment Variable Priority
+
+1. **Command-line environment variables** (highest priority)
+2. **MCP client configuration** (Claude Desktop, VS Code)
+3. **`.env` file** in project root
+4. **`config/config.json`** file (lowest priority)
+
+### Examples for Different Use Cases
+
+#### Development Setup (Multiple Providers)
+```env
+# Local development with multiple providers
+OPENAI_API_KEY=sk-your-dev-key
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OLLAMA_DEFAULT_MODEL=gemma3:4b
+OPENROUTER_API_KEY=sk-or-v1-your-dev-key
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free
+DEFAULT_PROVIDER=ollama
+LOG_LEVEL=debug
+```
+
+#### Production Setup (OpenAI + Fallback)
+```env
+# Production with primary and fallback providers
+OPENAI_API_KEY=sk-your-prod-key
+OPENAI_DEFAULT_MODEL=gpt-4o
+OPENROUTER_API_KEY=sk-or-v1-your-backup-key
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free
+DEFAULT_PROVIDER=openai
+LOG_LEVEL=info
+CACHE_TTL=600
+TIMEOUT=60000
+```
+
+#### Local-Only Setup (Ollama)
+```env
+# Local-only setup with Ollama
+OLLAMA_BASE_URL=http://localhost:11434/v1
+OLLAMA_DEFAULT_MODEL=gemma3:4b
+OLLAMA_MODELS=gemma3:4b,llama3.2:3b,qwen3:4b,deepseek-r1:1.5b
+OLLAMA_NICKNAME="Local AI Duck"
+DEFAULT_PROVIDER=ollama
+LOG_LEVEL=info
+```
 
 ### Step 3: Restart Claude Desktop
 
