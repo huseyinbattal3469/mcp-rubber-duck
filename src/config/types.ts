@@ -10,6 +10,8 @@ export const ProviderConfigSchema = z.object({
   system_prompt: z.string().optional(),
   timeout: z.number().positive().optional(),
   max_retries: z.number().min(0).max(5).optional(),
+  headers: z.record(z.string(), z.string()).optional(), // <-- Yeni alan
+  type: z.string().optional(), // e.g. 'openrouter', 'openai', 'ollama', 'custom'
 });
 
 export const ConfigSchema = z.object({

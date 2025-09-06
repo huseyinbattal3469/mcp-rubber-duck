@@ -66,7 +66,32 @@ npm run build
 npm start
 ```
 
-## Configuration
+## Agnostic Multi-Model Provider Architecture
+
+### How It Works
+
+MCP Rubber Duck uses an adapter/factory pattern to support any number of providers and models. Each provider is configured via ENV or `config/config.json`, and adapters handle API differences. You can select models per request, and add new providers by creating an adapter and updating the factory.
+
+### Adding Providers & Models
+
+1. **Configure providers** in `.env` or `config/config.json` with API keys, base URLs, and model lists.
+2. **Adapters** for OpenAI, OpenRouter, and Ollama are included. To add more, create a new adapter in `src/providers/adapters/` and update the factory in `index.ts`.
+3. **Model selection**: Pass the desired model in each chat/completion request. The system will use your chosen model if available.
+
+### Example Usage
+
+```js
+const manager = new ProviderManager(configManager);
+const response = await manager.askDuck('openai', 'Hello!', { model: 'gpt-4o' });
+const ollamaResponse = await manager.askDuck('ollama', 'Hi!', { model: 'llama3.2' });
+```
+
+### Extending
+
+- To add a new provider, implement the `ProviderAdapter` interface and add it to the factory.
+- All adapters support custom headers, failover, and health checks.
+
+---
 
 ### Method 1: Environment Variables
 

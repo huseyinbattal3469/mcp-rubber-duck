@@ -1,4 +1,5 @@
 import { DuckProvider } from './provider.js';
+import { createProviderAdapter } from './adapters/index.js';
 import { ConfigManager } from '../config/config.js';
 import { ProviderHealth, DuckResponse } from '../config/types.js';
 import { ChatOptions, ModelInfo } from './types.js';
@@ -22,6 +23,7 @@ export class ProviderManager {
 
     for (const [name, providerConfig] of Object.entries(allProviders)) {
       try {
+        const adapter = createProviderAdapter(providerConfig);
         const provider = new DuckProvider(name, providerConfig.nickname, {
           apiKey: providerConfig.api_key,
           baseURL: providerConfig.base_url,
@@ -30,8 +32,9 @@ export class ProviderManager {
           temperature: providerConfig.temperature,
           timeout: providerConfig.timeout,
           maxRetries: providerConfig.max_retries,
+          headers: providerConfig.headers,
           systemPrompt: providerConfig.system_prompt,
-        });
+        }, adapter);
 
         this.providers.set(name, provider);
         logger.info(`Initialized provider: ${name} (${providerConfig.nickname})`);
@@ -93,10 +96,13 @@ export class ProviderManager {
     const startTime = Date.now();
 
     try {
-      const response = await provider.chat({
+      // Always allow model override per request
+      const chatOptions: ChatOptions = {
         messages: [{ role: 'user', content: prompt, timestamp: new Date() }],
-        ...options,
-      });
+        ...(options || {}),
+        model: options?.model || provider.getInfo().model,
+      };
+      const response = await provider.chat(chatOptions);
 
       return {
         provider: provider.name,

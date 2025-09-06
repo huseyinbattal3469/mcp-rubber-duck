@@ -18,6 +18,7 @@ export interface ProviderOptions {
   timeout?: number;
   maxRetries?: number;
   systemPrompt?: string;
+  headers?: Record<string, string>;
 }
 
 export interface ChatOptions {

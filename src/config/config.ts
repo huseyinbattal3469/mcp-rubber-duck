@@ -81,7 +81,7 @@ export class ConfigManager {
       }
       return value || match;
     });
-    
+
     const merged = JSON.parse(replaced);
 
     // Apply environment overrides
@@ -94,6 +94,23 @@ export class ConfigManager {
     if (process.env.LOG_LEVEL) {
       merged.log_level = process.env.LOG_LEVEL;
     }
+
+    // --- Yeni: provider-specific headers from ENV (JSON) ---
+    // Örnek ENV isimlendirme: OPENROUTER_HEADERS -> providers.openrouter.headers
+    Object.keys(process.env).forEach(key => {
+      if (key.endsWith('_HEADERS')) {
+        try {
+          const providerKey = key.slice(0, -8).toLowerCase(); // "OPENROUTER_HEADERS" -> "openrouter"
+          const parsed = JSON.parse(process.env[key] as string);
+          if (!merged.providers) merged.providers = {};
+          if (!merged.providers[providerKey]) merged.providers[providerKey] = {};
+          merged.providers[providerKey].headers = parsed;
+          logger.info(`Loaded headers for provider ${providerKey} from ${key}`);
+        } catch (err) {
+          logger.warn(`Failed to parse JSON in env ${key}: ${err}`);
+        }
+      }
+    });
 
     return merged;
   }
