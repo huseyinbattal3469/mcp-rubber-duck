@@ -286,6 +286,30 @@ Alternatively, create an `mcp.json` file in your VS Code user data directory:
 **macOS**: `~/Library/Application Support/Code/User/mcp.json`
 **Linux**: `~/.config/Code/User/mcp.json`
 
+#### Basic VS Code Configuration (OpenRouter Focus)
+```json
+{
+  "servers": {
+    "rubber-duck": {
+      "command": "node",
+      "args": ["C:/Users/yourusername/Desktop/mcp-rubber-duck/dist/index.js"],
+      "type": "stdio",
+      "env": {
+        "OPENROUTER_API_KEY": "sk-or-v1-your-openrouter-api-key-here",
+        "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
+        "OPENROUTER_DEFAULT_MODEL": "deepseek/deepseek-chat-v3.1:free",
+        "OPENROUTER_MODELS": "deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free",
+        "OPENROUTER_NICKNAME": "Cost-Effective Duck",
+        "DEFAULT_PROVIDER": "openrouter",
+        "DEFAULT_TEMPERATURE": "0.7",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+#### Advanced VS Code Configuration (Multi-Provider with OpenRouter)
 ```json
 {
   "servers": {
@@ -299,8 +323,9 @@ Alternatively, create an `mcp.json` file in your VS Code user data directory:
         "OLLAMA_DEFAULT_MODEL": "gemma3:4b",
         "OPENROUTER_API_KEY": "sk-or-v1-your-openrouter-api-key-here",
         "OPENROUTER_BASE_URL": "https://openrouter.ai/api/v1",
-        "OPENROUTER_MODELS": "deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free",
+        "OPENROUTER_MODELS": "deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free,anthropic/claude-3.5-sonnet",
         "OPENROUTER_DEFAULT_MODEL": "deepseek/deepseek-chat-v3.1:free",
+        "OPENROUTER_NICKNAME": "Smart Router Duck",
         "DEFAULT_PROVIDER": "openrouter",
         "DEFAULT_TEMPERATURE": "0.7",
         "LOG_LEVEL": "info"
@@ -448,6 +473,47 @@ OLLAMA_DEFAULT_MODEL=gemma3:4b
 OLLAMA_MODELS=gemma3:4b,llama3.2:3b,qwen3:4b,deepseek-r1:1.5b
 OLLAMA_NICKNAME="Local AI Duck"
 DEFAULT_PROVIDER=ollama
+LOG_LEVEL=info
+```
+
+#### OpenRouter-Focused Setup (Free Models)
+```env
+# Cost-effective setup using OpenRouter free models
+OPENROUTER_API_KEY=sk-or-v1-your-api-key-here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free
+OPENROUTER_MODELS=deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free,meta-llama/llama-3.2-3b-instruct:free
+OPENROUTER_NICKNAME="Cost-Effective Duck"
+DEFAULT_PROVIDER=openrouter
+LOG_LEVEL=info
+CACHE_TTL=600
+```
+
+#### OpenRouter Premium Setup (Paid Models)
+```env
+# Premium setup with OpenRouter's best models
+OPENROUTER_API_KEY=sk-or-v1-your-premium-api-key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_DEFAULT_MODEL=anthropic/claude-3.5-sonnet
+OPENROUTER_MODELS=anthropic/claude-3.5-sonnet,openai/gpt-4o,google/gemini-2.5-flash,deepseek/deepseek-chat-v3.1
+OPENROUTER_NICKNAME="Premium Router Duck"
+DEFAULT_PROVIDER=openrouter
+DEFAULT_TEMPERATURE=0.8
+LOG_LEVEL=info
+TIMEOUT=60000
+```
+
+#### Multi-Provider with OpenRouter Fallback
+```env
+# Primary providers with OpenRouter as cost-effective fallback
+OPENAI_API_KEY=sk-your-openai-key
+OPENAI_DEFAULT_MODEL=gpt-4o-mini
+GEMINI_API_KEY=your-gemini-key
+GEMINI_DEFAULT_MODEL=gemini-2.5-flash
+OPENROUTER_API_KEY=sk-or-v1-your-fallback-key
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free
+OPENROUTER_MODELS=deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,z-ai/glm-4.5-air:free
+DEFAULT_PROVIDER=openai
 LOG_LEVEL=info
 ```
 
@@ -613,6 +679,62 @@ await duck_council({
 });
 ```
 
+### OpenRouter Specific Examples
+
+#### Using Free Models
+```javascript
+// Use cost-effective free models
+await ask_duck({
+  prompt: "Write a Python function to sort a list",
+  provider: "openrouter",
+  model: "deepseek/deepseek-chat-v3.1:free"
+});
+```
+
+#### Using Premium Models
+```javascript
+// Use premium models for complex tasks
+await ask_duck({
+  prompt: "Design a microservices architecture for an e-commerce platform",
+  provider: "openrouter", 
+  model: "anthropic/claude-3.5-sonnet",
+  temperature: 0.8
+});
+```
+
+#### Model Comparison via OpenRouter
+```javascript
+// Compare different models through OpenRouter
+await compare_ducks({
+  prompt: "Explain quantum computing in simple terms",
+  providers: ["openrouter"],
+  models: [
+    "deepseek/deepseek-chat-v3.1:free",
+    "anthropic/claude-3.5-sonnet", 
+    "openai/gpt-4o"
+  ]
+});
+```
+
+#### Cost-Optimized Workflow
+```javascript
+// Start with free model, escalate to premium if needed
+let response = await ask_duck({
+  prompt: "Debug this JavaScript code: console.log('hello world')",
+  provider: "openrouter",
+  model: "deepseek/deepseek-chat-v3.1:free"
+});
+
+// If free model response is insufficient, try premium
+if (needsBetterResponse(response)) {
+  response = await ask_duck({
+    prompt: "Provide a detailed code review and optimization suggestions for this JavaScript code: console.log('hello world')",
+    provider: "openrouter",
+    model: "anthropic/claude-3.5-sonnet"
+  });
+}
+```
+
 ## Provider-Specific Setup
 
 ### Ollama (Local)
@@ -639,6 +761,48 @@ ollama pull llama3.2
 ### Groq
 1. Get API key from https://console.groq.com/keys
 2. Add to environment: `GROQ_API_KEY=gsk_...`
+
+### OpenRouter (Recommended for Cost-Effective AI)
+OpenRouter provides access to multiple AI models through a single API, often at competitive prices with free tier options.
+
+#### Setup Steps:
+1. **Create Account**: Sign up at [OpenRouter](https://openrouter.ai/)
+2. **Get API Key**: Visit [OpenRouter Keys](https://openrouter.ai/keys) to generate your API key
+3. **Add Credit**: Add credits to your account for paid models (optional for free models)
+4. **Configure Environment**:
+```env
+OPENROUTER_API_KEY=sk-or-v1-your-api-key-here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free
+```
+
+#### Popular Free Models:
+- `deepseek/deepseek-chat-v3.1:free` - High-quality reasoning model
+- `moonshotai/kimi-k2:free` - Good for general tasks
+- `z-ai/glm-4.5-air:free` - Lightweight and fast
+- `meta-llama/llama-3.2-3b-instruct:free` - Meta's open model
+
+#### Popular Paid Models:
+- `anthropic/claude-3.5-sonnet` - Premium reasoning and writing
+- `openai/gpt-4o` - Latest OpenAI model
+- `google/gemini-2.5-flash` - Fast Google model
+- `deepseek/deepseek-chat-v3.1` - Full version (paid)
+
+#### Sample Configuration:
+```env
+# OpenRouter with multiple model tiers
+OPENROUTER_API_KEY=sk-or-v1-your-key
+OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat-v3.1:free
+OPENROUTER_MODELS=deepseek/deepseek-chat-v3.1:free,moonshotai/kimi-k2:free,anthropic/claude-3.5-sonnet,openai/gpt-4o
+OPENROUTER_NICKNAME="Smart Router Duck"
+DEFAULT_PROVIDER=openrouter
+```
+
+#### Usage Tips:
+- **Free Models**: Great for development and testing
+- **Paid Models**: Use for production or high-quality outputs
+- **Rate Limits**: Free models have usage limits, paid models are more generous
+- **Model Selection**: Choose models based on your specific use case (coding, writing, reasoning)
 
 ### Together AI
 1. Get API key from https://api.together.xyz/
